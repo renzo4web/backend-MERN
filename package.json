@@ -1,0 +1,27 @@
+{
+    "name": "backend-MERN",
+    "version": "1.0.0",
+    "description": "Backend MERN, CRUD",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "nodemon index.js",
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/renzo4web/backend-MERN.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/renzo4web/backend-MERN/issues"
+    },
+    "homepage": "https://github.com/renzo4web/backend-MERN#readme",
+    "dependencies": {
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "express-validator": "^6.12.1"
+    }
+}
