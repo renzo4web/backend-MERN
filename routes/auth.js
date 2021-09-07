@@ -3,25 +3,40 @@
     host + /api/auth
  */
 
-const {Router} = require('express');
-const {check} = require('express-validator')
+const { Router } = require('express');
+const { check } = require('express-validator');
 const router = Router();
 
-const {createUser, loginUser, renewToken} = require('../controllers/auth');
-const {validateFields} = require("../middlewares/field-validator");
+const { createUser, loginUser, renewToken } = require('../controllers/auth');
+const { validateFields } = require('../middlewares/field-validator');
+const { validateJWT } = require('../middlewares/jwt-validate');
 
-router.post('/new', [
-    check('name', "Name must be provided").not().isEmpty(),
-    check('email', "Email must be valid").isEmail(),
-    check('password', "Password must be at least 6 characters long").isLength({min: 6}),
-    validateFields
-], createUser);
+router.post(
+    '/new',
+    [
+        check('name', 'Name must be provided').not().isEmpty(),
+        check('email', 'Email must be valid').isEmail(),
+        check(
+            'password',
+            'Password must be at least 6 characters long'
+        ).isLength({ min: 6 }),
+        validateFields,
+    ],
+    createUser
+);
 
-router.post('/', [
-    check('email', "Email must be valid").isEmail(),
-    check('password', "Password must be at least 6 characters long").isLength({min: 6}),
-    validateFields
-], loginUser);
+router.post(
+    '/',
+    [
+        check('email', 'Email must be valid').isEmail(),
+        check(
+            'password',
+            'Password must be at least 6 characters long'
+        ).isLength({ min: 6 }),
+        validateFields,
+    ],
+    loginUser
+);
 
-router.get('/renew', renewToken);
+router.get('/renew', validateJWT, renewToken);
 module.exports = router;

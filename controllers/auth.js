@@ -1,35 +1,99 @@
-const {response} = require('express');
+const { response } = require('express');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+const { generateJWT } = require('../helpers/jwt');
 
-const createUser = (req, res = response) => {
-    const {name, email, password} = req.body
+const createUser = async (req, res = response) => {
+    const { email, password } = req.body;
+    try {
+        let user = await User.findOne({ email });
 
+        if (user) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'User with this email already registered',
+            });
+        }
 
-    res.json({
-        ok: true,
-        msg: '/new',
-        name,
-        email,
-        password
-    });
+        user = new User(req.body);
+
+        // Encrypt Password
+        const salt = bcrypt.genSaltSync();
+        user.password = bcrypt.hashSync(password, salt);
+
+        await user.save();
+
+        // Generate JWT
+        const token = await generateJWT(user.id, user.name);
+
+        res.status(200).json({
+            ok: true,
+            uid: user.id,
+            name: user.name,
+            token,
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Please contact your Database Administrator',
+        });
+    }
 };
 
-const loginUser = (req, res) => {
+const loginUser = async (req, res) => {
+    const { email, password } = req.body;
 
-    const {email, password} = req.body
+    try {
+        let user = await User.findOne({ email });
 
+        if (user === null) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'User not found in database',
+            });
+        }
 
-    res.json({
-        ok: true,
-        msg: '/login',
-        email,
-        password
-    });
+        // Check Password
+        const validPassword = bcrypt.compareSync(password, user.password);
+
+        if (!validPassword) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Password Invalid',
+            });
+        }
+
+        // generate JWT
+
+        const token = await generateJWT(user.id, user.name);
+
+        res.status(200).json({
+            ok: true,
+            uid: user.id,
+            name: user.name,
+            token,
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Please contact your Database Administrator',
+        });
+    }
 };
 
-const renewToken = (req, res) => {
+const renewToken = async (req, res) => {
+    const { uid, name } = req;
+
+    // generate new token
+    const token = await generateJWT(uid, name);
+
     res.json({
         ok: true,
-        msg: '/renew',
+        token,
     });
 };
 
