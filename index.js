@@ -9,7 +9,7 @@ const app = express();
 // Database
 dbConnection();
 
-// app.use(cors);
+app.use(cors());
 
 app.use(express.static('public'));
 
